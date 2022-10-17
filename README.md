@@ -1,6 +1,6 @@
 # WalletConnect
 
-[![](https://jitpack.io/v/trustwallet/wallet-connect-kotlin.svg)](https://jitpack.io/#trustwallet/wallet-connect-kotlin)
+[![](https://jitpack.io/v/imtianx/wallet-connect-kotlin.svg)](https://jitpack.io/#imtianx/wallet-connect-kotlin)
 
 [WalletConnect](https://walletconnect.org/) Kotlin SDK, implements 1.0.0 websocket based protocol.
 
@@ -15,6 +15,7 @@
 - [x] Approve and reject `eth_signTransaction` / `eth_sendTransaction`
 - [x] Approve and reject `bnb_sign` (binance dex orders)
 - [x] session persistent / recovery
+- [x] switch evm chain by chainId `wallet_switchEthereumChain`
 
 ## Installation
 
@@ -31,7 +32,7 @@ Add the following line to your app's build.gradle:
 
 ```gradle
 dependencies {
-    implementation "com.github.TrustWallet:wallet-connect-kotlin:$wc_version"
+    implementation "com.github.imtianx:wallet-connect-kotlin:$wc_version"
 }
 ```
 
@@ -82,6 +83,10 @@ wcClient.onEthSendTransaction = { id, transaction ->
 
 wcClient.onSignTransaction = { id, transaction -> 
     // handle bnb_sign
+}
+
+wcClient.onWalletChangeNetwork = { id, chainId->
+    // handle wallet_switchEthereumChain
 }
 ```
 
