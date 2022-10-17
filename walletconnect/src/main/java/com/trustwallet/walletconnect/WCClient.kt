@@ -172,6 +172,16 @@ open class WCClient (
         return encryptAndSend(gson.toJson(response))
     }
 
+    fun switchChain(id: Long? = null, chainId: Int) {
+        this.chainId = "$chainId"
+        updateSession()
+        val response = JsonRpcResponse(
+            id = id ?: generateId(),
+            result = null
+        )
+        encryptAndSend(gson.toJson(response))
+    }
+
     fun updateSession(accounts: List<String>? = null, chainId: Int? = null, approved: Boolean = true): Boolean {
         val request = JsonRpcRequest(
             id = generateId(),
@@ -336,7 +346,7 @@ open class WCClient (
             WCMethod.WALLET_SWITCH_NETWORK -> {
                 val param = gson.fromJson<List<WCChangeNetwork>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                val chainId = param.chainIdHex.removePrefix("0x").toInt(16)
+                val chainId = param.chainIdHex.removePrefix("0x").toInt(10)
                 onWalletChangeNetwork(request.id, chainId)
             }
             WCMethod.WALLET_ADD_NETWORK -> {

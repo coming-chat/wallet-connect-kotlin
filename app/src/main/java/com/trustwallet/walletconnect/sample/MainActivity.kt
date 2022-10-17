@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
         WCClient(GsonBuilder(), OkHttpClient())
     }
 
-    val privateKey = PrivateKey("ba005cd605d8a02e3d5dfd04234cef3a3ee4f76bfbad2722d1fb5af8e12e6764".decodeHex())
+    val privateKey =
+        PrivateKey("ba005cd605d8a02e3d5dfd04234cef3a3ee4f76bfbad2722d1fb5af8e12e6764".decodeHex())
     val address = CoinType.ETHEREUM.deriveAddress(privateKey)
 
     private val peerMeta = WCPeerMeta(name = "Example", url = "https://example.com")
@@ -49,6 +50,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.switchBscButton.setOnClickListener {
+            onWalletChangeNetwork(chainId = 56)
+        }
+
+        binding.uriInput.editText?.setText(
+            "wc:5265cdfb-e4ff-4b3c-9b92-92267e90925d@1?bridge=https%3A%2F%2F8.bridge.walletconnect.org&key=abf021126d8a006e532298bf52c1e2d642c1d81f73f5b39652ade0d35114c3de"
+        )
+
         binding.addressInput.editText?.setText(address)
         wcClient.onDisconnect = { _, _ -> onDisconnect() }
         wcClient.onFailure = { t -> onFailure(t) }
@@ -57,13 +66,15 @@ class MainActivity : AppCompatActivity() {
 
         wcClient.onEthSign = { id, message -> onEthSign(id, message) }
         wcClient.onEthSignTransaction = { id, transaction -> onEthTransaction(id, transaction) }
-        wcClient.onEthSendTransaction = { id, transaction -> onEthTransaction(id, transaction, send = true) }
+        wcClient.onEthSendTransaction =
+            { id, transaction -> onEthTransaction(id, transaction, send = true) }
 
         wcClient.onBnbTrade = { id, order -> onBnbTrade(id, order) }
         wcClient.onBnbCancel = { id, order -> onBnbCancel(id, order) }
         wcClient.onBnbTransfer = { id, order -> onBnbTransfer(id, order) }
         wcClient.onBnbTxConfirm = { _, param -> onBnbTxConfirm(param) }
         wcClient.onSignTransaction = { id, transaction -> onSignTransaction(id, transaction) }
+        wcClient.onWalletChangeNetwork = { id, chainId -> onWalletChangeNetwork(id, chainId) }
 
         setupConnectButton()
     }
@@ -145,7 +156,10 @@ class MainActivity : AppCompatActivity() {
                 .setTitle(message.type.name)
                 .setMessage(message.data)
                 .setPositiveButton("Sign") { _, _ ->
-                    wcClient.approveRequest(id, privateKey.sign(message.data.decodeHex(), CoinType.ETHEREUM.curve()))
+                    wcClient.approveRequest(
+                        id,
+                        privateKey.sign(message.data.decodeHex(), CoinType.ETHEREUM.curve())
+                    )
                 }
                 .setNegativeButton("Cancel") { _, _ ->
                     rejectRequest(id)
@@ -154,15 +168,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onEthTransaction(id: Long, payload: WCEthereumTransaction, send: Boolean = false) { }
+    private fun onEthTransaction(id: Long, payload: WCEthereumTransaction, send: Boolean = false) {}
 
-    private fun onBnbTrade(id: Long, order: WCBinanceTradeOrder) { }
+    private fun onBnbTrade(id: Long, order: WCBinanceTradeOrder) {}
 
-    private fun onBnbCancel(id: Long, order: WCBinanceCancelOrder) { }
+    private fun onBnbCancel(id: Long, order: WCBinanceCancelOrder) {}
 
-    private fun onBnbTransfer(id: Long, order: WCBinanceTransferOrder) { }
+    private fun onBnbTransfer(id: Long, order: WCBinanceTransferOrder) {}
 
-    private fun onBnbTxConfirm(param: WCBinanceTxConfirmParam) { }
+    private fun onBnbTxConfirm(param: WCBinanceTxConfirmParam) {}
 
     private fun onGetAccounts(id: Long) {
         val account = WCAccount(
@@ -172,7 +186,16 @@ class MainActivity : AppCompatActivity() {
         wcClient.approveRequest(id, account)
     }
 
-    private fun onSignTransaction(id: Long, payload: WCSignTransaction) { }
+    private fun onSignTransaction(id: Long, payload: WCSignTransaction) {}
+
+    private fun onWalletChangeNetwork(id: Long? = null, chainId: Int) {
+        if (!isFinishing) {
+            runOnUiThread {
+                binding.chainInput.editText?.setText("$chainId")
+            }
+            wcClient.switchChain(id, chainId)
+        }
+    }
 
     fun String.decodeHex(): ByteArray {
         check(length % 2 == 0) { "Must have an even length" }
