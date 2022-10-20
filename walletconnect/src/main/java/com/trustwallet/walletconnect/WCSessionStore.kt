@@ -6,12 +6,12 @@ import java.util.*
 
 data class WCSessionStoreItem(
         val session: WCSession,
-        val chainId: Int,
+        var chainId: Int,
         val peerId: String,
         val remotePeerId: String,
         val remotePeerMeta: WCPeerMeta,
         val isAutoSign: Boolean = false,
-        val date: Date = Date()
+        var date: Date = Date()
 )
 
 interface WCSessionStore {
