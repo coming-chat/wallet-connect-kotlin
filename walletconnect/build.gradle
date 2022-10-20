@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 apply plugin: 'kotlin-android'
 
-group='com.github.TrustWallet'
+group = 'com.imtianx.walletconnect'
 
 android {
     compileSdkVersion 31
