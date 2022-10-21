@@ -1,0 +1,75 @@
+/**
+ * publish aar to maven repo
+ */
+apply plugin: 'maven-publish'
+
+// set groupId and artifactId
+def PROJ_GROUP_ID = "org.comingchat"
+def PROJ_ARTIFACT_ID = "wallet-connect-v1"
+
+// clean cached code
+publish.dependsOn clean
+
+
+def getVersionName = { -> return getGitTagName() ?: getGitShortSHA() ?: getCurrentTime()
+}
+
+static def getCurrentTime() {
+    return new Date().format("yyyyMMddHHmm", TimeZone.getTimeZone("GMT+08:00"))
+}
+
+static def getGitShortSHA() {
+    return 'git rev-parse --short HEAD'.execute().text.trim()
+}
+
+static def getGitTagName() {
+    return 'git describe --tags'.execute().text.trim()
+}
+
+task generateSourcesJar(type: Jar) {
+    classifier 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId = PROJ_GROUP_ID
+                artifactId = PROJ_ARTIFACT_ID
+                version getVersionName()
+                artifact tasks.getByName("bundleReleaseAar")
+                artifact generateSourcesJar
+
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    def dependenciesList = []
+                    dependenciesList.addAll(configurations.api.allDependencies)
+                    dependenciesList.each {
+                        if (null != it.group) {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                            dependencyNode.appendNode('scope', 'compile')
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                // config repo and user info
+                name = "GitHubPackages"
+                url "https://maven.pkg.github.com/coming-chat/wallet-sdk-android"
+                credentials {
+                    username = System.getenv("GITHUB_USER") ?: project.findProperty("gpr.user")
+                    password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("gpr.key")
+                }
+            }
+        }
+    }
+}
+
+

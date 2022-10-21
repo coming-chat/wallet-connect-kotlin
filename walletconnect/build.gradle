@@ -1,8 +1,8 @@
 apply plugin: 'com.android.library'
 
 apply plugin: 'kotlin-android'
+apply from: "../gradle/mvn-publish.gradle"
 
-group = 'com.imtianx.walletconnect'
 
 android {
     compileSdkVersion 31
