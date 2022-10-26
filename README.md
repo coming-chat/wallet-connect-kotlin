@@ -1,6 +1,7 @@
 # WalletConnect
 
-[![](https://jitpack.io/v/imtianx/wallet-connect-kotlin.svg)](https://jitpack.io/#imtianx/wallet-connect-kotlin)
+[![Publish package CI](https://github.com/imtianx/wallet-connect-kotlin/actions/workflows/publish-ci.yml/badge.svg)](https://github.com/imtianx/wallet-connect-kotlin/actions/workflows/publish-ci.yml)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/imtianx/wallet-connect-kotlin)
 
 [WalletConnect](https://walletconnect.org/) Kotlin SDK, implements 1.0.0 websocket based protocol.
 
@@ -19,22 +20,14 @@
 
 ## Installation
 
-Add it in your root build.gradle at the end of repositories:
-```gradle
-allprojects {
-	repositories {
-		...
-		maven { url 'https://jitpack.io' }
-	}
-}
-```
-Add the following line to your app's build.gradle:
+Android releases are hosted on [GitHub packages](https://github.com/coming-chat/wallet-sdk-android/packages/1683567), you need to add GitHub access token to install it. Please checkout [this installation guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry).
 
 ```gradle
 dependencies {
-    implementation "com.github.imtianx:wallet-connect-kotlin:$wc_version"
+    implementation "org.comingchat:wallet-connect-v1:$Tag"
 }
 ```
+> replace the `Tag` in the code with [latest](https://github.com/coming-chat/wallet-sdk-android/packages/1683567)
 
 ## Usage
 
