@@ -1,11 +1,13 @@
 package com.imtianx.walletconnect.models.ethereum
 
-data class WCEthereumSignMessage (
+data class WCEthereumSignMessage(
     val raw: List<String>,
     val type: WCSignType
 ) {
-    enum class WCSignType {
-        MESSAGE, PERSONAL_MESSAGE, TYPED_MESSAGE
+    enum class WCSignType(val desc: String) {
+        SIGNMESSAGE("signMessage"),
+        SIGNPERSONALMESSAGE("signPersonalMessage"),
+        SIGNTYPEDMESSAGE("signTypedMessage");
     }
 
     /**
@@ -14,13 +16,17 @@ data class WCEthereumSignMessage (
      *
      *  - MESSAGE: `[address, data ]`
      *  - TYPED_MESSAGE: `[address, data]`
-     *  - PERSONAL_MESSAGE: `[data, address]`
+     *  - SIGNPERSONALMESSAGE: `[data, address]`
      *
      *  reference: https://docs.walletconnect.org/json-rpc/ethereum#eth_signtypeddata
      */
-    val data get() = when (type) {
-        WCSignType.MESSAGE -> raw[1]
-        WCSignType.TYPED_MESSAGE -> raw[1]
-        WCSignType.PERSONAL_MESSAGE -> raw[0]
-    }
+    val data
+        get() = when (type) {
+            WCSignType.SIGNMESSAGE -> raw[1]
+            WCSignType.SIGNTYPEDMESSAGE -> raw[1]
+            WCSignType.SIGNPERSONALMESSAGE -> raw[0]
+        }
+
+    val isTypeMessage
+        get() = this.type == WCSignType.SIGNTYPEDMESSAGE
 }

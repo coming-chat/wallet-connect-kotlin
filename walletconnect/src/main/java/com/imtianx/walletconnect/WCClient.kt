@@ -25,6 +25,7 @@ import java.util.*
 const val JSONRPC_VERSION = "2.0"
 const val WS_CLOSE_NORMAL = 1000
 
+@Deprecated("not uss", replaceWith = ReplaceWith("WCClient2"))
 open class WCClient(
     builder: GsonBuilder = GsonBuilder(),
     private val httpClient: OkHttpClient
@@ -161,14 +162,19 @@ open class WCClient(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(
+        accounts: List<String>, chainId: Int, aptosAccounts: List<String>? = null,
+        chainName: String? = null
+    ): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
         this.chainId = chainId.toString()
         val result = WCApproveSessionResponse(
             chainId = chainId,
             accounts = accounts,
             peerId = peerId,
-            peerMeta = peerMeta
+            peerMeta = peerMeta,
+            aptosAccounts = aptosAccounts,
+            chain = chainName
         )
         val response = JsonRpcResponse(
             id = handshakeId,
@@ -200,7 +206,9 @@ open class WCClient(
                 WCSessionUpdate(
                     approved = approved,
                     chainId = chainId ?: this.chainId?.toIntOrNull(),
-                    accounts = accounts
+                    accounts = accounts,
+                    aptosAccounts = null,
+                    chain = null
                 )
             )
         )
@@ -314,7 +322,7 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.SIGNMESSAGE)
                 )
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
@@ -323,7 +331,10 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
+                    WCEthereumSignMessage(
+                        params,
+                        WCEthereumSignMessage.WCSignType.SIGNPERSONALMESSAGE
+                    )
                 )
             }
             WCMethod.ETH_SIGN_TYPE_DATA,
@@ -333,7 +344,7 @@ open class WCClient(
                     throw InvalidJsonRpcParamsException(request.id)
                 onEthSign(
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.SIGNTYPEDMESSAGE)
                 )
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {

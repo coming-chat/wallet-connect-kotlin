@@ -7,5 +7,7 @@ data class WCApproveSessionResponse(
     val chainId: Int,
     val accounts: List<String>,
     val peerId: String?,
-    val peerMeta: WCPeerMeta?
+    val peerMeta: WCPeerMeta?,
+    val aptosAccounts: List<String>?,
+    val chain: String?,//chain name
 )

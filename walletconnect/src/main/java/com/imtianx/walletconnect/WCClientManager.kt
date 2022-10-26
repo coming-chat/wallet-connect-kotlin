@@ -1,6 +1,7 @@
 package com.imtianx.walletconnect
 
 import com.google.gson.GsonBuilder
+import com.imtianx.walletconnect.jsonrpc.JsonRpcResponse
 import com.imtianx.walletconnect.models.WCPeerMeta
 import com.imtianx.walletconnect.models.session.WCSession
 import okhttp3.OkHttpClient
@@ -82,6 +83,20 @@ object WCClientManager {
             it.rejectSession()
             it.disconnect()
         }
+    }
+
+    fun rejectRequest(uri: String, id: Long, message: String? = null) {
+        clientList[uri]?.let {
+            if (message.isNullOrEmpty()) {
+                it.rejectRequest(id)
+            } else {
+                it.rejectRequest(id, message)
+            }
+        }
+    }
+
+    fun <T> approveRequest(uri: String, id: Long, result: T): Boolean {
+        return clientList[uri]?.approveRequest(id, result) ?: false
     }
 
     fun killsession(uri: String) {

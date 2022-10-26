@@ -19,10 +19,30 @@ interface WalletConnectCallback {
     fun onDisconnect(sessionUrl: String, code: Int, reason: String) {}
     fun onSessionRequest(sessionUrl: String, id: Long, requestInfo: WCRequestInfo) {}
 
-    fun onEthSign(sessionUrl: String, id: Long, message: WCEthereumSignMessage) {}
-    fun onEthSignTransaction(sessionUrl: String, id: Long, transaction: WCEthereumTransaction) {}
-    fun onEthSendTransaction(sessionUrl: String, id: Long, transaction: WCEthereumTransaction) {}
-    fun onSignTransaction(sessionUrl: String, id: Long, transaction: WCSignTransaction) {}
+    fun onEthSign(sessionUrl: String, id: Long, message: WCEthereumSignMessage, chainId: String) {}
+    fun onEthSignTransaction(
+        sessionUrl: String,
+        id: Long,
+        transaction: WCEthereumTransaction,
+        chainId: String
+    ) {
+    }
+
+    fun onEthSendTransaction(
+        sessionUrl: String,
+        id: Long,
+        transaction: WCEthereumTransaction,
+        chainId: String
+    ) {
+    }
+
+    fun onSignTransaction(
+        sessionUrl: String,
+        id: Long,
+        transaction: WCSignTransaction,
+        chainId: String
+    ) {
+    }
 
     fun onCustomRequest(sessionUrl: String, id: Long, payload: String) {}
     

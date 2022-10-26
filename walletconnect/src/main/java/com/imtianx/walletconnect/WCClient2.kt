@@ -52,6 +52,8 @@ open class WCClient2(
 
     var chainId: String? = null
         private set
+    var chainName: String? = null
+        private set
 
     var isConnected: Boolean = false
         private set
@@ -72,24 +74,31 @@ open class WCClient2(
         connectListeners.forEach { it.onSessionRequest(sessionUrl, id, requestInfo) }
     }
 
-    override fun onEthSign(sessionUrl: String, id: Long, message: WCEthereumSignMessage) {
-        connectListeners.forEach { it.onEthSign(sessionUrl, id, message) }
+    override fun onEthSign(
+        sessionUrl: String,
+        id: Long,
+        message: WCEthereumSignMessage,
+        chainId: String
+    ) {
+        connectListeners.forEach { it.onEthSign(sessionUrl, id, message, chainId) }
     }
 
     override fun onEthSignTransaction(
         sessionUrl: String,
         id: Long,
-        transaction: WCEthereumTransaction
+        transaction: WCEthereumTransaction,
+        chainId: String
     ) {
-        connectListeners.forEach { it.onEthSignTransaction(sessionUrl, id, transaction) }
+        connectListeners.forEach { it.onEthSignTransaction(sessionUrl, id, transaction, chainId) }
     }
 
     override fun onEthSendTransaction(
         sessionUrl: String,
         id: Long,
-        transaction: WCEthereumTransaction
+        transaction: WCEthereumTransaction,
+        chainId: String
     ) {
-        connectListeners.forEach { it.onEthSendTransaction(sessionUrl, id, transaction) }
+        connectListeners.forEach { it.onEthSendTransaction(sessionUrl, id, transaction, chainId) }
     }
 
     override fun onCustomRequest(sessionUrl: String, id: Long, payload: String) {
@@ -100,8 +109,13 @@ open class WCClient2(
         connectListeners.forEach { it.onGetAccounts(sessionUrl, id) }
     }
 
-    override fun onSignTransaction(sessionUrl: String, id: Long, transaction: WCSignTransaction) {
-        connectListeners.forEach { it.onSignTransaction(sessionUrl, id, transaction) }
+    override fun onSignTransaction(
+        sessionUrl: String,
+        id: Long,
+        transaction: WCSignTransaction,
+        chainId: String
+    ) {
+        connectListeners.forEach { it.onSignTransaction(sessionUrl, id, transaction, chainId) }
     }
 
     override fun onWalletChangeNetwork(
@@ -197,14 +211,22 @@ open class WCClient2(
         socket = httpClient.newWebSocket(request, this)
     }
 
-    fun approveSession(accounts: List<String>, chainId: Int): Boolean {
+    fun approveSession(
+        accounts: List<String>,
+        chainId: Int,
+        aptosAccounts: List<String>? = null,
+        chainName: String? = null
+    ): Boolean {
         check(handshakeId > 0) { "handshakeId must be greater than 0 on session approve" }
         this.chainId = chainId.toString()
+        this.chainName = chainName.toString()
         val result = WCApproveSessionResponse(
             chainId = chainId,
             accounts = accounts,
             peerId = peerId,
-            peerMeta = peerMeta
+            peerMeta = peerMeta,
+            aptosAccounts = aptosAccounts,
+            chain = chainName
         )
         val response = JsonRpcResponse(
             id = handshakeId,
@@ -215,6 +237,7 @@ open class WCClient2(
 
     fun switchChain(id: Long? = null, chainId: Int, chainName: String = "") {
         this.chainId = "$chainId"
+        this.chainName = chainName
         requestUpdateSession()
         val response = JsonRpcResponse(
             id = id ?: generateId(),
@@ -225,7 +248,9 @@ open class WCClient2(
 
     fun requestUpdateSession(
         accounts: List<String>? = null,
+        aptosAccounts: List<String>? = null,
         chainId: Int? = null,
+        chainName: String? = null,
         approved: Boolean = true
     ): Boolean {
         val request = JsonRpcRequest(
@@ -235,11 +260,12 @@ open class WCClient2(
                 WCSessionUpdate(
                     approved = approved,
                     chainId = chainId ?: this.chainId?.toIntOrNull(),
-                    accounts = accounts
+                    accounts = accounts,
+                    aptosAccounts = aptosAccounts,
+                    chain = chainName
                 )
             )
         )
-        this.chainId = chainId.toString()
         return encryptAndSend(gson.toJson(request))
     }
 
@@ -264,6 +290,7 @@ open class WCClient2(
             resetState()
             this.session = session.session
             this.chainId = "${session.chainId}"
+            this.chainName = session.chainName
             peerId = session.peerId
             remotePeerId = session.remotePeerId
             peerMeta = session.remotePeerMeta
@@ -271,7 +298,11 @@ open class WCClient2(
                 reConnectSocket(session.session.bridge)
             }
             sessionUrl = session.session.toUri()
-            requestUpdateSession(approved = true)
+            requestUpdateSession(
+                approved = true,
+                chainId = this.chainId?.toIntOrNull(),
+                chainName = chainName
+            )
         } else {
             onFailure(sessionUrl, Throwable("WCSessionStoreItem is null"))
         }
@@ -340,15 +371,16 @@ open class WCClient2(
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 handshakeId = request.id
                 remotePeerId = param.peerId
-                var chainIdInt = (chainId ?: "0").toIntOrNull() ?: 0
-                if (param.chain.isNullOrEmpty()) {
+                var chainIdInt = (param.chainId ?: "0").toIntOrNull() ?: 0
+                if (param.chain.isNullOrEmpty() || chainIdInt == 0) {
                     chainIdInt = 1
                 }
                 chainId = "$chainIdInt"
+                chainName = param.chain
                 if (session != null) {
                     val info = WCRequestInfo(
                         "$chainIdInt", param.chain ?: "", WCSessionStoreItem(
-                            session!!, chainIdInt, peerId ?: "",
+                            session!!, chainIdInt, chainName ?: "", peerId ?: "",
                             remotePeerId ?: "", param.peerMeta,
                             false, Date()
                         )
@@ -371,7 +403,8 @@ open class WCClient2(
                 onEthSign(
                     sessionUrl,
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.MESSAGE)
+                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.SIGNMESSAGE),
+                    chainId ?: "1"
                 )
             }
             WCMethod.ETH_PERSONAL_SIGN -> {
@@ -381,7 +414,11 @@ open class WCClient2(
                 onEthSign(
                     sessionUrl,
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.PERSONAL_MESSAGE)
+                    WCEthereumSignMessage(
+                        params,
+                        WCEthereumSignMessage.WCSignType.SIGNPERSONALMESSAGE
+                    ),
+                    chainId ?: "1"
                 )
             }
             WCMethod.ETH_SIGN_TYPE_DATA,
@@ -392,18 +429,22 @@ open class WCClient2(
                 onEthSign(
                     sessionUrl,
                     request.id,
-                    WCEthereumSignMessage(params, WCEthereumSignMessage.WCSignType.TYPED_MESSAGE)
+                    WCEthereumSignMessage(
+                        params,
+                        WCEthereumSignMessage.WCSignType.SIGNTYPEDMESSAGE
+                    ),
+                    chainId ?: "1"
                 )
             }
             WCMethod.ETH_SIGN_TRANSACTION -> {
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSignTransaction(sessionUrl, request.id, param)
+                onEthSignTransaction(sessionUrl, request.id, param, chainId ?: "1")
             }
             WCMethod.ETH_SEND_TRANSACTION -> {
                 val param = gson.fromJson<List<WCEthereumTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onEthSendTransaction(sessionUrl, request.id, param)
+                onEthSendTransaction(sessionUrl, request.id, param, chainId ?: "1")
             }
             WCMethod.GET_ACCOUNTS -> {
                 onGetAccounts(sessionUrl, request.id)
@@ -411,7 +452,7 @@ open class WCClient2(
             WCMethod.SIGN_TRANSACTION -> {
                 val param = gson.fromJson<List<WCSignTransaction>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
-                onSignTransaction(sessionUrl, request.id, param)
+                onSignTransaction(sessionUrl, request.id, param, chainId ?: "1")
             }
             WCMethod.WALLET_SWITCH_NETWORK -> {
                 val param = gson.fromJson<List<WCChangeNetwork>>(request.params)
