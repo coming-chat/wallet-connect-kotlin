@@ -1,7 +1,6 @@
 package com.imtianx.walletconnect
 
 import com.google.gson.GsonBuilder
-import com.imtianx.walletconnect.jsonrpc.JsonRpcResponse
 import com.imtianx.walletconnect.models.WCPeerMeta
 import com.imtianx.walletconnect.models.session.WCSession
 import okhttp3.OkHttpClient
@@ -74,8 +73,12 @@ object WCClientManager {
         }
     }
 
-    fun approveSession(uri: String, accounts: List<String>, chainId: Int) {
-        clientList[uri]?.approveSession(accounts, chainId)
+    fun approveSession(
+        uri: String, accounts: List<String>, chainId: Int,
+        aptosAccounts: List<String>? = null,
+        chaiName: String? = null
+    ) {
+        clientList[uri]?.approveSession(accounts, chainId, aptosAccounts, chaiName)
     }
 
     fun rejectSession(uri: String) {
