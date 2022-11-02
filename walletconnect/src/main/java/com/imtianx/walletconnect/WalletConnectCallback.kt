@@ -45,8 +45,12 @@ interface WalletConnectCallback {
     }
 
     fun onCustomRequest(sessionUrl: String, id: Long, payload: String) {}
-    
+
     fun onGetAccounts(sessionUrl: String, id: Long) {}
     fun onWalletChangeNetwork(sessionUrl: String, id: Long, chainId: Int, chainName: String) {}
     fun onWalletAddNetwork(sessionUrl: String, id: Long, network: WCAddNetwork) {}
+
+    fun onAptosSignMessage(sessionUrl: String, id: Long, jsonParams: String) {}
+    fun onAptosSignTransaction(sessionUrl: String, id: Long, jsonParams: String) {}
+    fun onAptosSendTransaction(sessionUrl: String, id: Long, jsonParams: String) {}
 }

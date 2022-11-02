@@ -134,6 +134,18 @@ open class WCClient2(
         connectListeners.forEach { it.onWalletAddNetwork(sessionUrl, id, network) }
     }
 
+    override fun onAptosSignMessage(sessionUrl: String, id: Long, jsonParams: String) {
+        connectListeners.forEach { it.onAptosSignMessage(sessionUrl, id, jsonParams) }
+    }
+
+    override fun onAptosSignTransaction(sessionUrl: String, id: Long, jsonParams: String) {
+        connectListeners.forEach { it.onAptosSignTransaction(sessionUrl, id, jsonParams) }
+    }
+
+    override fun onAptosSendTransaction(sessionUrl: String, id: Long, jsonParams: String) {
+        connectListeners.forEach { it.onAptosSendTransaction(sessionUrl, id, jsonParams) }
+    }
+
     override fun onOpen(webSocket: WebSocket, response: Response) {
         Log.d(TAG, "<< websocket opened >>")
         isConnected = true
@@ -469,6 +481,33 @@ open class WCClient2(
                 val param = gson.fromJson<List<WCAddNetwork>>(request.params)
                     .firstOrNull() ?: throw InvalidJsonRpcParamsException(request.id)
                 onWalletAddNetwork(sessionUrl, request.id, param)
+            }
+            WCMethod.APTOS_SIGN -> {
+                val param: String = try {
+                    request.params[0].toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw InvalidJsonRpcParamsException(request.id)
+                }
+                onAptosSignMessage(sessionUrl, request.id, param)
+            }
+            WCMethod.APTOS_SIGNTRANSACTION -> {
+                val param: String = try {
+                    request.params[0].toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw InvalidJsonRpcParamsException(request.id)
+                }
+                onAptosSignTransaction(sessionUrl, request.id, param)
+            }
+            WCMethod.APTOS_SENDTRANSACTION -> {
+                val param: String = try {
+                    request.params[0].toString()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    throw InvalidJsonRpcParamsException(request.id)
+                }
+                onAptosSendTransaction(sessionUrl, request.id, param)
             }
             else -> {}
         }

@@ -3,7 +3,6 @@ package com.imtianx.walletconnect.models.ethereum
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.google.gson.GsonBuilder
-import com.imtianx.walletconnect.models.binance.ethTransactionSerializer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

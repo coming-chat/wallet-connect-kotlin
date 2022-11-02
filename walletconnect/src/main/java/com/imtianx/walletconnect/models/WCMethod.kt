@@ -43,5 +43,17 @@ enum class WCMethod {
     WALLET_SWITCH_NETWORK,
 
     @SerializedName("wallet_addEthereumChain")
-    WALLET_ADD_NETWORK;
+    WALLET_ADD_NETWORK,
+    
+    @SerializedName("aptos_sign")
+    APTOS_SIGN,
+
+    @SerializedName("aptos_signTransaction")
+    APTOS_SIGNTRANSACTION,
+
+    @SerializedName("aptos_sendTransaction")
+    APTOS_SENDTRANSACTION,
+    
+    ;
+    
 }
