@@ -1,4 +1,4 @@
-# WalletConnect
+# WalletConnect (Evm and Aptos)
 
 [![Publish package CI](https://github.com/imtianx/wallet-connect-kotlin/actions/workflows/publish-ci.yml/badge.svg)](https://github.com/imtianx/wallet-connect-kotlin/actions/workflows/publish-ci.yml)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/imtianx/wallet-connect-kotlin)
@@ -16,7 +16,13 @@
 - [x] Approve and reject `eth_signTransaction` / `eth_sendTransaction`
 - [x] Approve and reject `bnb_sign` (binance dex orders)
 - [x] session persistent / recovery
-- [x] switch evm chain by chainId `wallet_switchEthereumChain`
+- [x] switch evm chain by chainId `wallet_switchEthereumChain` 
+- [x] switch to aptos chain by chainName `wallet_switchEthereumChain`
+- [x] Approve and reject `aptos_sign`
+- [x] Approve and reject `aptos_signTransaction`
+- [x] Approve and reject `aptos_sendTransaction`
+
+>connect test simple :[wallectconnect-cc-example](https://github.com/wbh1328551759/wallectconnect-cc-example),  https://wallectconnect-cc-example.vercel.app
 
 ## Installation
 
