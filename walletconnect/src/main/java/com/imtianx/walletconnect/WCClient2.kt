@@ -64,6 +64,7 @@ open class WCClient2(
 
     override fun onFailure(sessionUrl: String, error: Throwable) {
         connectListeners.forEach { it.onFailure(sessionUrl, error) }
+        onError(sessionUrl, error.message)
     }
 
     override fun onDisconnect(sessionUrl: String, code: Int, reason: String) {
@@ -144,6 +145,10 @@ open class WCClient2(
 
     override fun onAptosSendTransaction(sessionUrl: String, id: Long, jsonParams: String) {
         connectListeners.forEach { it.onAptosSendTransaction(sessionUrl, id, jsonParams) }
+    }
+
+    override fun onError(sessionUrl: String, errorMsg: String?) {
+        connectListeners.forEach { it.onError(sessionUrl, errorMsg) }
     }
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -377,6 +382,9 @@ open class WCClient2(
             }
         } catch (e: InvalidJsonRpcParamsException) {
             invalidParams(e.requestId)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            onError(sessionUrl, e.message)
         }
     }
 

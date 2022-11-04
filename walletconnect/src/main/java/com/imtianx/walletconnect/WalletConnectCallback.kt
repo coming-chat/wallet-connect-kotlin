@@ -53,4 +53,6 @@ interface WalletConnectCallback {
     fun onAptosSignMessage(sessionUrl: String, id: Long, jsonParams: String) {}
     fun onAptosSignTransaction(sessionUrl: String, id: Long, jsonParams: String) {}
     fun onAptosSendTransaction(sessionUrl: String, id: Long, jsonParams: String) {}
+
+    fun onError(sessionUrl: String, errorMsg: String?) {}
 }
