@@ -396,7 +396,7 @@ open class WCClient2(
                 handshakeId = request.id
                 remotePeerId = param.peerId
                 var chainIdInt = (param.chainId ?: "0").toIntOrNull() ?: 0
-                if (param.chain.isNullOrEmpty() || chainIdInt == 0) {
+                if (param.chain.isNullOrEmpty() && chainIdInt == 0) {
                     chainIdInt = 1
                 }
                 chainId = "$chainIdInt"
