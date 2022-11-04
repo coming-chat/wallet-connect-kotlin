@@ -111,6 +111,11 @@ if (wcClient.session != null) {
 }
 ```
 
+## Proguard
+
+keep models for `gson`,[proguard-rules.pro](walletconnect/proguard-rules.pro)
+
+
 ## License
 
 WalletConnect is available under the MIT license. See the LICENSE file for more info.
